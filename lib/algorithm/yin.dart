@@ -63,20 +63,46 @@ class Yin extends PitchAlgorithm {
     return _result;
   }
 
-  //Implements the difference function as described in step 2 of the YIN
+  /**
+   * Computes the squared difference of the provided audio buffer.
+   *
+   * This method calculates the difference function of the audio buffer,
+   * a crucial step in the YIN pitch detection algorithm. The squared
+   * difference is computed for different frame offsets (denoted by `tau`),
+   * and the results are stored in the `_yinBuffer`.
+   *
+   * @param audioBuffer The audio data for which the difference function is computed.
+   */
   void _difference(final List<double> audioBuffer) {
+
+    // Initialize index, tau, and delta variables
     int index, tau;
     double delta;
+
+    // Reset all values in the _yinBuffer to zero.
     for (tau = 0; tau < _yinBuffer.length; tau++) {
       _yinBuffer[tau] = 0;
     }
+
+    // Compute the squared difference for each frame offset, starting from 1.
     for (tau = 1; tau < _yinBuffer.length; tau++) {
-      for (index = 0; index < _yinBuffer.length; index++) {
+
+      // For each sample in the audio buffer, compute the squared difference
+      // between it and the sample `tau` steps ahead.
+      // We've added a condition here to ensure that accessing `index + tau`
+      // won't go out of the bounds of the `audioBuffer`.
+      for (index = 0; index + tau < audioBuffer.length; index++) {
+
+        // Calculate the difference for this frame offset
         delta = audioBuffer[index] - audioBuffer[index + tau];
+
+        // Accumulate the squared difference in the _yinBuffer
         _yinBuffer[tau] += delta * delta;
       }
     }
   }
+
+
 
   //The cumulative mean normalized difference function as described in step 3 of the YIN paper.
   void _cumulativeMeanNormalizedDifference() {
